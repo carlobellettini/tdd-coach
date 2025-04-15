@@ -57,6 +57,14 @@ class TokenUsage {
   }
 
   /**
+   * Get formatted token string.
+   * @returns {string} tokens used
+   */
+  getUsedTokens() {
+    return `IN=${this.inputTokens} OUT=${this.outputTokens}`;
+  }
+
+  /**
    * Get detailed usage statistics.
    * @returns {Object} Object containing usage statistics
    */
@@ -68,6 +76,7 @@ class TokenUsage {
       callCount: this.callCount,
       estimatedCost: this.getEstimatedCost(),
       formattedCost: this.getFormattedCost(),
+      usedTokens: this.getUsedTokens(),
       inputCost: (this.inputTokens / 1_000_000) * this.INPUT_COST_PER_MTOK,
       outputCost: (this.outputTokens / 1_000_000) * this.OUTPUT_COST_PER_MTOK
     };

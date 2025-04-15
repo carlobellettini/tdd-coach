@@ -2,7 +2,7 @@
 
 ## Overview
 
-TDD Coach is an educational application designed to help users learn Test-Driven Development through guided kata exercises. The application provides real-time feedback from an AI coach (using the Anthropic Claude API) to guide users through the TDD cycle.
+TDD Coach is an educational application designed to help users learn Test-Driven Development through guided kata exercises. The application provides real-time feedback from an AI coach (e.g., using the Anthropic Claude API) to guide users through the TDD cycle.
 
 ## Core Features
 
@@ -17,7 +17,7 @@ TDD Coach is an educational application designed to help users learn Test-Driven
 - **Templating**: Handlebars for both UI and LLM prompts
 - **UI Enhancements**: HTMX for dynamic updates without a separate frontend framework
 - **Code Editors**: CodeMirror for in-browser code editing
-- **AI Integration**: Anthropic Claude API for coaching feedback
+- **AI Integration**: LLM API for coaching feedback
 
 ## System Architecture
 
@@ -85,10 +85,10 @@ The "Help Me" hint feature also adopts the same color scheme as the main feedbac
 ### 4. LLM Integration
 
 The LLM service:
-- Sends formatted prompts to the Anthropic Claude API
+- Sends formatted prompts to the LLM API
 - Requests responses in JSON format
 - Extracts feedback comments, hints, and a binary proceed/don't proceed signal
-- Tracks token usage and calculates estimated costs based on Anthropic's pricing
+- Tracks token usage and calculates estimated costs
 
 ### 5. UI Architecture
 

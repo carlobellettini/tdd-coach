@@ -15,7 +15,7 @@ The TDD Coach guides users through implementing coding katas using Test-Driven D
 3. **GREEN**: Write the minimal code to make the test pass
 4. **REFACTOR**: Improve the code while keeping tests passing
 
-The application uses an LLM (Claude model from Anthropic) to provide personalized coaching feedback at each step of the process.
+The application uses an LLM (e.g., Claude model from Anthropic) to provide personalized coaching feedback at each step of the process.
 
 ## Installation
 
@@ -24,9 +24,9 @@ The application uses an LLM (Claude model from Anthropic) to provide personalize
    ```
    npm install
    ```
-3. Create a `.env` file based on `.env.example` and add your Anthropic API key:
+3. Create a `.env` file based on `.env.example` and add your LLM API key:
    ```
-   ANTHROPIC_API_KEY=your_api_key_here
+   LLM_API_KEY=your_api_key_here
    PORT=3000
    ```
 
@@ -57,7 +57,7 @@ The application uses an LLM (Claude model from Anthropic) to provide personalize
 - HTMX for dynamic UI interactions without a separate frontend framework
 - Handlebars for view and prompt templating
 - CodeMirror for code editing
-- Anthropic's Claude for AI coaching
+- LLM (e.g., Anthropic's Claude) for AI coaching
 
 ## Project Structure
 

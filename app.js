@@ -1,8 +1,8 @@
 require('dotenv').config();
 
 // Check for required environment variables
-if (!process.env.ANTHROPIC_API_KEY) {
-  console.error('Error: ANTHROPIC_API_KEY environment variable is not defined');
+if (!process.env.LLM_API_KEY) {
+  console.error('Error: LLM_API_KEY environment variable is not defined');
   console.error('Please create a .env file based on .env.example and add your API key');
   process.exit(1);
 }
@@ -59,7 +59,7 @@ testCaptureManager.initialize().catch(err => {
 // Start server
 app.listen(PORT, () => {
   console.log(`TDD Coach app listening at http://localhost:${PORT}`);
-  console.log('Using Anthropic API key:', process.env.ANTHROPIC_API_KEY.substring(0, 5) + '...');
+  console.log('Using LLM API key:', process.env.LLM_API_KEY.substring(0, 5) + '...');
   if (process.env.PROMPT_CAPTURE_MODE === 'true') {
     console.log('🔴 Test Capture Mode ENABLED');
   }

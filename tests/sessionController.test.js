@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { newSession, submitCode, getHint, restartSession, getSession } = require('../controllers/sessionController');
 const { getLlmFeedback } = require('../services/llmService');
 

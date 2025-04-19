@@ -2,7 +2,7 @@ const OpenAI = require('openai');
 
 const client = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
-  apiKey: process.env.LLM_API_KEY,
+  apiKey: process.env.LLM_API_KEY, 
 });
 
 const CHEAP_MODEL = 'claude-3-5-haiku-20241022';

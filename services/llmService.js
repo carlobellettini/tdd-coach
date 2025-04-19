@@ -6,25 +6,33 @@ const client = new OpenAI({
 });
 
 const CHEAP_MODEL = 'claude-3-5-haiku-20241022';
-const BEST_MODEL = 'claude-3-5-sonnet-20240620';
+const BEST_MODEL = 'claude-3-7-sonnet-latest';
 
 /**
- * Gets feedback from the LLM using the provided prompt
- * @param {string} prompt - The fully formatted prompt to send
+ * Gets feedback from the LLM using the provided system and user prompts
+ * @param {Object} prompts - Object with system and user prompts
+ * @param {string} prompts.system - System prompt with instructions for the LLM
+ * @param {string} prompts.user - User prompt with content to evaluate
  * @param {TokenUsage} [tokenUsage] - Optional TokenUsage tracker to update with usage data
  * @returns {Object} - Parsed JSON response with comments, hint, and proceed field
  */
-exports.getLlmFeedback = async (prompt, tokenUsage) => {
+exports.getLlmFeedback = async (prompts, tokenUsage) => {
   try {
+    if (!prompts || !prompts.system || !prompts.user) {
+      throw new Error('Both system and user prompts are required');
+    }
+    
     console.log('--------');
-    console.log('Prompt:', prompt);
+    console.log('System prompt:', prompts.system);
+    console.log('User prompt:', prompts.user);
     console.log('--------');
 
     const response = await client.chat.completions.create({
       model: "deepseek/deepseek-chat-v3-0324:free",
       max_tokens: 1000,
+      system: prompts.system,
       messages: [
-        { role: 'user', content: prompt }
+        { role: 'user', content: prompts.user }
       ]
     });
 
@@ -57,6 +65,6 @@ exports.getLlmFeedback = async (prompt, tokenUsage) => {
     };
   } catch (error) {
     console.error('Error in LLM service:', error);
-    throw new Error('Failed to get LLM feedback');
+    throw new Error(`Failed to get LLM feedback: ${error.message}`);
   }
 };

@@ -49,6 +49,8 @@ The application uses an LLM (e.g., Claude model from Anthropic) to provide perso
 - Two-step test selection process (select → confirm)
 - Dedicated coach feedback area with color-coded progress status (green for proceed, red for needs improvement)
 - Token usage tracking and cost estimation for LLM interactions (displays in the UI)
+- Persistent LLM feedback that's always preserved between page reloads
+- Development mode toggle to skip LLM API calls and use fake positive responses
 - Prompt Testing System for capturing, managing, and analyzing test cases for LLM prompts
 
 ## Technology Stack

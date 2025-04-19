@@ -1,103 +1,110 @@
 const Session = require('../../models/Session');
+const katas = require('../../models/katas');
 
 describe('Session', () => {
-  let originalEnv;
+  let session;
+  let fizzBuzzKata;
   
   beforeEach(() => {
-    // Save the original environment 
-    originalEnv = process.env.PROMPT_CAPTURE_MODE;
+    fizzBuzzKata = katas.fizzbuzz;
+    session = new Session(fizzBuzzKata);
+  });
+
+  test('should initialize with the kata information', () => {
+    expect(session.getKataName()).toBe('FizzBuzz');
+    expect(session.getProductionCode()).toBe(fizzBuzzKata.initialProductionCode);
+    expect(session.getTestCode()).toBe(fizzBuzzKata.initialTestCode);
+    expect(session.getState()).toBe('PICK');
+    expect(session.getTestCases()).toHaveLength(fizzBuzzKata.testCases.length);
   });
   
-  afterEach(() => {
-    // Restore the original environment
-    process.env.PROMPT_CAPTURE_MODE = originalEnv;
+  test('should update production code', () => {
+    const newCode = 'function fizzBuzz(n) { return n; }';
+    session.setProductionCode(newCode);
+    expect(session.getProductionCode()).toBe(newCode);
   });
   
-  describe('captureInteraction', () => {
-    it('should store captured interaction when PROMPT_CAPTURE_MODE is true', () => {
-      // Arrange
-      process.env.PROMPT_CAPTURE_MODE = 'true';
-      const session = new Session('fizzbuzz');
-      const interactionData = {
-        state: 'RED',
-        llmResponse: { proceed: 'yes', comments: 'Great test!' }
-      };
-      
-      // Act
-      session.captureInteraction(interactionData);
-      
-      // Assert
-      expect(session.capturedInteraction).not.toBeNull();
-      expect(session.capturedInteraction.state).toBe('RED');
-      expect(session.capturedInteraction.llmResponse.proceed).toBe('yes');
-      expect(session.capturedInteraction.llmResponse.comments).toBe('Great test!');
-      expect(session.capturedInteraction.timestamp).toBeDefined();
-      expect(session.capturedInteraction.id).toBeDefined();
-    });
+  test('should update test code', () => {
+    const newCode = 'test("example", () => { expect(true).toBe(true); });';
+    session.setTestCode(newCode);
+    expect(session.getTestCode()).toBe(newCode);
+  });
+  
+  test('should not allow direct modification of test cases', () => {
+    const testCases = session.getTestCases();
+    const originalLength = testCases.length;
     
-    it('should not store captured interaction when PROMPT_CAPTURE_MODE is not true', () => {
-      // Arrange
-      process.env.PROMPT_CAPTURE_MODE = 'false';
-      const session = new Session('fizzbuzz');
-      const interactionData = {
-        state: 'RED',
-        llmResponse: { proceed: 'yes', comments: 'Great test!' }
-      };
-      
-      // Act
-      session.captureInteraction(interactionData);
-      
-      // Assert
-      expect(session.capturedInteraction).toBeNull();
-    });
-  });
-  
-  describe('getCurrentCapture', () => {
-    it('should return the captured interaction', () => {
-      // Arrange
-      process.env.PROMPT_CAPTURE_MODE = 'true';
-      const session = new Session('fizzbuzz');
-      const interactionData = {
-        state: 'RED',
-        llmResponse: { proceed: 'yes', comments: 'Great test!' }
-      };
-      session.captureInteraction(interactionData);
-      
-      // Act
-      const result = session.getCurrentCapture();
-      
-      // Assert
-      expect(result).toBe(session.capturedInteraction);
-    });
+    // Try to modify the returned array
+    testCases.push({ id: 999, description: 'New test', status: 'TODO' });
     
-    it('should return null if no interaction was captured', () => {
-      // Arrange
-      const session = new Session('fizzbuzz');
-      
-      // Act
-      const result = session.getCurrentCapture();
-      
-      // Assert
-      expect(result).toBeNull();
-    });
+    // Verify the internal state wasn't modified
+    expect(session.getTestCases()).toHaveLength(originalLength);
   });
   
-  describe('clearCapturedInteraction', () => {
-    it('should clear the captured interaction', () => {
-      // Arrange
-      process.env.PROMPT_CAPTURE_MODE = 'true';
-      const session = new Session('fizzbuzz');
-      const interactionData = {
-        state: 'RED',
-        llmResponse: { proceed: 'yes', comments: 'Great test!' }
-      };
-      session.captureInteraction(interactionData);
-      
-      // Act
-      session.clearCapturedInteraction();
-      
-      // Assert
-      expect(session.capturedInteraction).toBeNull();
-    });
+  test('should select a test case in PICK state', () => {
+    // In PICK state initially
+    expect(session.getState()).toBe('PICK');
+    
+    // Select first test case
+    session.selectTestCase(0);
+    expect(session.getCurrentTestIndex()).toBe(0);
+    
+    // Test case should be marked IN_PROGRESS
+    expect(session.getTestCases()[0].status).toBe('IN_PROGRESS');
+  });
+  
+  test('should not select a test case in non-PICK state', () => {
+    // Advance to RED state
+    session.selectTestIndex(0); // Set temporary selection
+    const feedback = { proceed: 'yes' };
+    session.processSubmission(feedback);
+    session.advanceState();
+    
+    // Try to select a test case in RED state
+    expect(() => {
+      session.selectTestCase(1);
+    }).toThrow();
+  });
+  
+  test('should store code execution results', () => {
+    const executionResults = {
+      success: true,
+      testResults: [{ 
+        description: 'test 1', 
+        success: true, 
+        error: null 
+      }],
+      console: 'Test output'
+    };
+    
+    session.setCodeExecutionResults(executionResults);
+    expect(session.getCodeExecutionResults()).toEqual(executionResults);
+  });
+  
+  test('should process LLM feedback and advance state when approved', () => {
+    // Setup
+    session.selectTestIndex(0);
+    const feedback = { proceed: 'yes' };
+    
+    // Process feedback in PICK state
+    const shouldAdvance = session.processSubmission(feedback);
+    expect(shouldAdvance).toBe(true);
+    
+    // Advance state
+    session.advanceState();
+    expect(session.getState()).toBe('RED');
+  });
+  
+  test('should not advance state when feedback does not approve', () => {
+    // Setup
+    session.selectTestIndex(0);
+    const feedback = { proceed: 'no' };
+    
+    // Process feedback in PICK state
+    const shouldAdvance = session.processSubmission(feedback);
+    expect(shouldAdvance).toBe(false);
+    
+    // State should remain PICK
+    expect(session.getState()).toBe('PICK');
   });
 });
